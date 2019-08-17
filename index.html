@@ -54,7 +54,7 @@
     //   }
     // }
 
-    
+
 
     class Create extends Component {
       constructor() {
@@ -89,28 +89,34 @@
         const user = await fetchUser();
         console.log(user);
         const notes = await axios.get(`${API}/users/${user.id}/notes`);
-        console.log(notes.data);
-        this.setState({ user:user, notes: notes.data});
+        this.setState({ user:user, notes:notes.data});
       }
-      
+
 
       async createNote(newNote){
         const {user, notes} = this.state;
-
         const note = {archived: false, text: newNote};
-        console.log(note);
         const returned = await axios.post(`${API}/users/${user.id}/notes`, note);
-        notes.push(returned);
-        this.setState({ user, notes });
+        notes.push(returned.data);
+        console.log(notes);
+        this.setState({notes});
 
       }
+
+      async destroy(noteId){
+        const {user, notes} = this.state;
+        await axios.delete(`${API}/users/${user.id}/notes/${noteId}`);
+        this.setState({notes: notes.filter(note => note.id !== noteId)});
+      }
+
+
       renderNote(note) {
         const archText = note.archived ? "Unarchive" : "Archive";
         return (
           <li key={note.id} >
             <p>{note.text}</p>
             <button>{archText}</button>
-            <button onClick={(ev) => console.log(note.id)}>Destroy</button>
+            <button onClick={(ev) => this.destroy(note.id)}>Destroy</button>
           </li>
         );
       }
