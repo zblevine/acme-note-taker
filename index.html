@@ -87,7 +87,6 @@
       }
       async componentDidMount() {
         const user = await fetchUser();
-        console.log(user);
         const notes = await axios.get(`${API}/users/${user.id}/notes`);
         this.setState({ user:user, notes:notes.data});
       }
@@ -95,13 +94,18 @@
 
       async createNote(newNote){
         const {user, notes} = this.state;
+        if(notes.length === 5) {
+          alert("You already have max number of notes!");
+          return;
+        }
         const note = {archived: false, text: newNote};
         const returned = await axios.post(`${API}/users/${user.id}/notes`, note);
+        console.log(returned);
         notes.push(returned.data);
-        console.log(notes);
         this.setState({notes});
-
       }
+
+      
 
       async destroy(noteId){
         const {user, notes} = this.state;
@@ -109,13 +113,21 @@
         this.setState({notes: notes.filter(note => note.id !== noteId)});
       }
 
+      async toggleArchive(noteId, archived) {
+        const {user, notes} = this.state;
+        await axios.put(`${API}/users/${user.id}/notes/${noteId}`, {archived: !archived});
+        this.setState({notes: notes.map(note => {
+          if(note.id === noteId) note.archived = !archived;
+          return note;
+        })});
+      }
 
       renderNote(note) {
         const archText = note.archived ? "Unarchive" : "Archive";
         return (
           <li key={note.id} >
             <p>{note.text}</p>
-            <button>{archText}</button>
+            <button onClick={(ev) => this.toggleArchive(note.id, note.archived)}>{archText}</button>
             <button onClick={(ev) => this.destroy(note.id)}>Destroy</button>
           </li>
         );
