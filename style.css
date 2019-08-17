@@ -1,0 +1,13 @@
+nav * {
+  margin: 0 2rem;
+}
+
+nav ul {
+  margin-bottom: 1rem;
+}
+
+.selected {
+  background-color: tomato;
+  padding: 0.5rem;
+  border-radius: 3px;
+}
