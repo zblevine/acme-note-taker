@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/5.0.1/react-router-dom.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Work+Sans:400,600,700&display=swap" rel="stylesheet">
   <title>Note Taker</title>
 </head>
 <body>
@@ -16,12 +17,11 @@
     const { render } = ReactDOM;
     const { Component } = React;
     const { HashRouter, NavLink, Switch, Link, Route, Redirect } = ReactRouterDOM;
-
     const API = 'https://acme-users-api-rev.herokuapp.com/api';
 
     const fetchUser = async ()=> {
       const storage = window.localStorage;
-      const userId = storage.getItem('userId'); 
+      const userId = storage.getItem('userId');
       if(userId){
         try {
           return (await axios.get(`${API}/users/detail/${userId}`)).data;
@@ -36,8 +36,22 @@
       return user;
     };
 
+
+
     class Note extends Component {
-      
+      constructor(){
+        super();
+        this.state = {
+          note: {}
+        }
+      }
+      render(){
+        const {note} = this.props
+        return(<p>
+        {note.text}
+        </p>
+        )
+      }
     }
 
     class App extends Component {
@@ -51,10 +65,12 @@
       async componentDidMount() {
         const user = await fetchUser();
         console.log(user);
-        this.setState({ user });
+        const notes = await axios.get(`${API}/users/${user.id}/notes`);
+        console.log(notes.data);
+        this.setState({ user:user, notes: notes.data});
       }
       render() {
-        const { user } = this.state;
+        const { user, notes } = this.state;
         return (
           <HashRouter>
             <nav>
@@ -66,7 +82,7 @@
               <h1>Acme Note-taker for { user.fullName }</h1>
             </nav>
             <Switch>
-              <Route path = '/notes' render = {() => <h1>Notes!</h1>} />
+              <Route path = '/notes' render = {() => <ul>{notes.map(note => <Note note={note} />)}</ul>} />
               <Route path = '/archived' render = {() => <h1>Archived!</h1> } />
               <Route path = '/create' render = {() => <h1>Create!</h1>} />
               <Redirect to='/notes' />
@@ -75,7 +91,7 @@
         );
       }
     }
-    
+
     const root = document.querySelector("#root");
     render(<App />, root);
   </script>
