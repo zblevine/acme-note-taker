@@ -38,19 +38,37 @@
 
 
 
-    class Note extends Component {
-      constructor(){
+    // class Note extends Component {
+    //   constructor(){
+    //     super();
+    //     this.state = {
+    //       note: {}
+    //     }
+    //   }
+    //   render(){
+    //     const {note} = this.props
+    //     return(<p>
+    //     {note.text}
+    //     </p>
+    //     )
+    //   }
+    // }
+
+    const renderNote = (note) => {
+      const archText = note.archived ? "Unarchive" : "Archive";
+      return (
+        <div key={note.id}>
+          <li>{note.text}</li>
+          <button>{archText}</button>
+          <button>Destroy</button>
+        </div>
+      );
+    }
+
+    class Create extends Component {
+      constructor() {
         super();
-        this.state = {
-          note: {}
-        }
-      }
-      render(){
-        const {note} = this.props
-        return(<p>
-        {note.text}
-        </p>
-        )
+        this.state = 
       }
     }
 
@@ -71,19 +89,21 @@
       }
       render() {
         const { user, notes } = this.state;
+        const unarchived = notes.filter(note => !note.archived)
+        const archived = notes.filter(note => note.archived)
         return (
           <HashRouter>
             <nav>
               <ul>
-                <NavLink to = '/notes' activeClassName = 'selected'> Notes () </NavLink>
-                <NavLink to = '/archived' activeClassName = 'selected'> Archived () </NavLink>
-                <NavLink to = '/create' activeClassName = 'selected'> Create </NavLink>
+                <NavLink to = '/notes' activeClassName = 'selected'>Notes ({unarchived.length})</NavLink>
+                <NavLink to = '/archived' activeClassName = 'selected'>Archived ({archived.length})</NavLink>
+                <NavLink to = '/create' activeClassName = 'selected'>Create</NavLink>
               </ul>
               <h1>Acme Note-taker for { user.fullName }</h1>
             </nav>
             <Switch>
-              <Route path = '/notes' render = {() => <ul>{notes.map(note => <Note note={note} />)}</ul>} />
-              <Route path = '/archived' render = {() => <h1>Archived!</h1> } />
+              <Route path = '/notes' render = {() => <ul>{ unarchived.map(note => renderNote(note)) }</ul>} />
+              <Route path = '/archived' render = {() => <ul>{ archived.map(note => renderNote(note)) }</ul>} />
               <Route path = '/create' render = {() => <h1>Create!</h1>} />
               <Redirect to='/notes' />
             </Switch>
