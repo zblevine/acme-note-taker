@@ -68,7 +68,20 @@
     class Create extends Component {
       constructor() {
         super();
-        this.state = 
+        this.state = {
+          newNote:'food'
+        }
+      }
+
+      render(){
+        const {newNote} = this.state
+        const {createNote} = this.props
+        return (
+          <div>
+          <input value={newNote} onChange={(ev) => this.setState({newNote:ev.target.value})} />
+          <button disabled ={newNote === ''} onClick = {() => {createNote(newNote)}}>Submit</button>
+          </div>
+        )
       }
     }
 
@@ -86,9 +99,24 @@
         const notes = await axios.get(`${API}/users/${user.id}/notes`);
         console.log(notes.data);
         this.setState({ user:user, notes: notes.data});
+
+      }
+
+      async createNote(newNote){
+        const {user} = this.state;
+        console.log(user.id)
+
+        const note = {};
+        note.archived = false;
+        note.text = newNote;
+        console.log(note);
+        await axios.post(`${API}/users/${user.id}/notes`, note);
+
+
       }
       render() {
         const { user, notes } = this.state;
+        const {createNote} = this;
         const unarchived = notes.filter(note => !note.archived)
         const archived = notes.filter(note => note.archived)
         return (
@@ -104,7 +132,7 @@
             <Switch>
               <Route path = '/notes' render = {() => <ul>{ unarchived.map(note => renderNote(note)) }</ul>} />
               <Route path = '/archived' render = {() => <ul>{ archived.map(note => renderNote(note)) }</ul>} />
-              <Route path = '/create' render = {() => <h1>Create!</h1>} />
+              <Route path = '/create' render = {() => <Create createNote = {createNote} /> }/>
               <Redirect to='/notes' />
             </Switch>
           </HashRouter>

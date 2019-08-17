@@ -6,12 +6,26 @@ nav * {
   margin: 0 2rem;
 }
 
+button{
+  height: 2rem;
+  font: inherit;
+  background-color: aliceblue;
+  margin-top: 1rem;
+}
+
 nav ul {
   margin-bottom: 1rem;
+  list-style: none;
 }
 
 .selected {
   background-color: tomato;
   padding: 0.5rem;
   border-radius: 3px;
+}
+
+input{
+  height: 3rem;
+  width: 100%;
+  font: 1.5rem;
 }
