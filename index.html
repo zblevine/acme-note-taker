@@ -60,17 +60,28 @@
       constructor() {
         super();
         this.state = {
-          newNote:'food'
+          newNote:'food',
+          error: ''
         }
+        this.onCreate.bind(this);
+      }
+
+      onCreate(newNote) {
+        this.props.createNote(newNote)
+          .then(() => this.props.history.push('/notes'))
+          .catch(ex => this.setState({error: ex.response.data.message}));
       }
 
       render(){
-        const {newNote} = this.state
+        const {newNote, error} = this.state
         const {createNote} = this.props
         return (
           <div>
-          <input value={newNote} onChange={(ev) => this.setState({newNote:ev.target.value})} />
-          <button disabled ={newNote === ''} onClick = {() => {createNote(newNote)}}>Submit</button>
+            <form onSubmit={(ev) => ev.preventDefault()}>
+              {error && <p className='errorText'>{error}</p>}
+              <input value={newNote} onChange={(ev) => this.setState({newNote:ev.target.value})} />
+              <button disabled ={newNote === ''} onClick = {() => {this.onCreate(newNote)}}>Submit</button>
+            </form>
           </div>
         )
       }
@@ -94,13 +105,8 @@
 
       async createNote(newNote){
         const {user, notes} = this.state;
-        if(notes.length === 5) {
-          alert("You already have max number of notes!");
-          return;
-        }
         const note = {archived: false, text: newNote};
         const returned = await axios.post(`${API}/users/${user.id}/notes`, note);
-        console.log(returned);
         notes.push(returned.data);
         this.setState({notes});
       }
@@ -150,7 +156,7 @@
             <Switch>
               <Route path = '/notes' render = {() => <ul>{ unarchived.map(note => this.renderNote(note)) }</ul>} />
               <Route path = '/archived' render = {() => <ul>{ archived.map(note => this.renderNote(note)) }</ul>} />
-              <Route path = '/create' render = {() => <Create createNote = {createNote} /> }/>
+              <Route path = '/create' render = {({history}) => <Create createNote = {createNote} history = {history} /> }/>
               <Redirect to='/notes' />
             </Switch>
           </HashRouter>

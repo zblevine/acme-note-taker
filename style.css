@@ -29,3 +29,7 @@ input{
   width: 100%;
   font: 1.5rem;
 }
+
+.errorText {
+  color: red;
+}
