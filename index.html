@@ -54,16 +54,7 @@
     //   }
     // }
 
-    const renderNote = (note) => {
-      const archText = note.archived ? "Unarchive" : "Archive";
-      return (
-        <div key={note.id}>
-          <li>{note.text}</li>
-          <button>{archText}</button>
-          <button>Destroy</button>
-        </div>
-      );
-    }
+    
 
     class Create extends Component {
       constructor() {
@@ -92,6 +83,7 @@
           user: {},
           notes: []
         }
+        this.createNote = this.createNote.bind(this);
       }
       async componentDidMount() {
         const user = await fetchUser();
@@ -99,20 +91,28 @@
         const notes = await axios.get(`${API}/users/${user.id}/notes`);
         console.log(notes.data);
         this.setState({ user:user, notes: notes.data});
-
       }
+      
 
       async createNote(newNote){
-        const {user} = this.state;
-        console.log(user.id)
+        const {user, notes} = this.state;
 
-        const note = {};
-        note.archived = false;
-        note.text = newNote;
+        const note = {archived: false, text: newNote};
         console.log(note);
-        await axios.post(`${API}/users/${user.id}/notes`, note);
+        const returned = await axios.post(`${API}/users/${user.id}/notes`, note);
+        notes.push(returned);
+        this.setState({ user, notes });
 
-
+      }
+      renderNote(note) {
+        const archText = note.archived ? "Unarchive" : "Archive";
+        return (
+          <li key={note.id} >
+            <p>{note.text}</p>
+            <button>{archText}</button>
+            <button onClick={(ev) => console.log(note.id)}>Destroy</button>
+          </li>
+        );
       }
       render() {
         const { user, notes } = this.state;
@@ -130,8 +130,8 @@
               <h1>Acme Note-taker for { user.fullName }</h1>
             </nav>
             <Switch>
-              <Route path = '/notes' render = {() => <ul>{ unarchived.map(note => renderNote(note)) }</ul>} />
-              <Route path = '/archived' render = {() => <ul>{ archived.map(note => renderNote(note)) }</ul>} />
+              <Route path = '/notes' render = {() => <ul>{ unarchived.map(note => this.renderNote(note)) }</ul>} />
+              <Route path = '/archived' render = {() => <ul>{ archived.map(note => this.renderNote(note)) }</ul>} />
               <Route path = '/create' render = {() => <Create createNote = {createNote} /> }/>
               <Redirect to='/notes' />
             </Switch>
